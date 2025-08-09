@@ -1133,7 +1133,7 @@ export const Content = ({
                     );
                   })()}
 
-                  {/* Alerte: Anexe diferite / Cantitate diferita */}
+                  {/* Alerte: Anexe diferite / Cantitate diferita / Atentie Pix */}
                   {(() => {
                     // Anexe diferite flag (existing logic)
                     const ad: any = (comanda as any)?.anexe_diferite_comanda;
@@ -1147,7 +1147,11 @@ export const Content = ({
                         return Number(q) > 1;
                       });
 
-                    if (!hasAnexeDiferite && !hasCantitateDiferita) return null;
+                    // Atenție Pix: atentie_pix = 1/true/'1'
+                    const ap: any = (comanda as any)?.atentie_pix;
+                    const hasAtentiePix = ap === '1' || ap === 1 || ap === true;
+
+                    if (!hasAnexeDiferite && !hasCantitateDiferita && !hasAtentiePix) return null;
 
                     return (
                       <div className="w-full mb-3">
@@ -1158,10 +1162,31 @@ export const Content = ({
                             </div>
                           )}
                           {hasCantitateDiferita && (
-                            <div className="rounded-md border px-3 py-2 text-xs font-medium bg-yellow-50 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-700">
+                            <div className="mb-2 rounded-md border px-3 py-2 text-xs font-medium bg-yellow-50 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-700">
                               Atentie: Cantitate diferita!
                             </div>
                           )}
+                          {hasAtentiePix && (
+                            <div className="rounded-md border px-3 py-2 text-xs font-medium bg-yellow-50 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-700">
+                              Atentie: Pix!
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Alert: Refacut - motiv afișat când refacut = 1 */}
+                  {(() => {
+                    const rf: any = (comanda as any)?.refacut;
+                    const isRefacut = rf === '1' || rf === 1 || rf === true;
+                    const motiv = (comanda as any)?.motiv_refacut;
+                    const motivText = typeof motiv === 'string' ? motiv.trim() : '';
+                    if (!isRefacut || !motivText) return null;
+                    return (
+                      <div className="w-full mb-3">
+                        <div className="rounded-md border px-3 py-2 text-xs font-medium bg-red-50 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-200 dark:border-red-700">
+                          Motiv refăcut: {motivText}
                         </div>
                       </div>
                     );
