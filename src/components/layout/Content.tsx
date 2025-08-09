@@ -1955,7 +1955,7 @@ export const Content = ({
       <Dialog open={showInventoryModal} onOpenChange={setShowInventoryModal}>
         <DialogContent className="sm:max-w-5xl fixed  left-1/2 transform  rounded-t-xl rounded-b-none max-h-[90vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>Stocuri Sistem Debitare</DialogTitle>
+            <DialogTitle>Stocuri Sistem Gravare</DialogTitle>
           </DialogHeader>
           <div className="py-4 flex-grow overflow-hidden">
             {isLoadingInventory ? (
