@@ -360,7 +360,7 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
                         />
                     </div>
                     
-                    <Footer />
+                    {/*<Footer />*/}
                 </>
             ) : (
                 <WireframeBackground>

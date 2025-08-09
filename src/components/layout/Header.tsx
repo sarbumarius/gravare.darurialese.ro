@@ -444,8 +444,21 @@ export const Header = ({
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Docked chat visibility from Content via global event
+  const [chatDocked, setChatDocked] = useState(false);
+  useEffect(() => {
+    const handler = (e: Event) => {
+      try {
+        const ce = e as CustomEvent<boolean>;
+        setChatDocked(!!ce.detail);
+      } catch (err) {}
+    };
+    window.addEventListener('chat-visibility-change', handler as EventListener);
+    return () => window.removeEventListener('chat-visibility-change', handler as EventListener);
+  }, []);
+
   return (
-    <header className="header-bg border-b border-border p-4 shadow-sm fixed top-0 left-0 right-0 z-50">
+    <header className={`header-bg border-b border-border p-4 shadow-sm fixed top-0 left-0 right-0 z-50 ${chatDocked ? 'pr-[15vw]' : ''}`}>
       <div className="flex items-center justify-between w-full gap-4">
         <div className="flex items-center gap-4">
           <img

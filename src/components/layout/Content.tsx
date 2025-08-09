@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, Info, Package, AlertTriangle, ShoppingCart, Eye, Printer, Gift, Database, ChevronDown, ChevronUp, Download, ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, X, Info, Package, AlertTriangle, ShoppingCart, Eye, Printer, Gift, Database, ChevronDown, ChevronUp, Download, ChevronLeft, ChevronRight, MessageSquare, Send } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -98,6 +98,33 @@ export const Content = ({
 
   // Filter: All | Cu gravare | Cu printare (default All)
   const [filterTipGrafica, setFilterTipGrafica] = useState<'all' | 'gravare' | 'printare'>('all');
+
+  // Floating chat state (Chat cu Grafica)
+  type ChatMsg = { from: 'eu' | 'grafica'; text: string; time: string };
+  const [showChat, setShowChat] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState<ChatMsg[]>([
+    { from: 'grafica', text: 'Salut! Cu ce te pot ajuta la fișierul de gravare?', time: '09:12' },
+    { from: 'eu', text: 'Salut! Putem mări textul cu 10% și să-l centram?', time: '09:13' },
+    { from: 'grafica', text: 'Da, fac acum și revin cu fișierul actualizat.', time: '09:14' },
+  ]);
+
+  const nowTime = () => {
+    try {
+      const d = new Date();
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      return '';
+    }
+  };
+
+  // Notify other components (Header) when chat visibility changes
+  useEffect(() => {
+    try {
+      // @ts-ignore CustomEvent detail is boolean
+      window.dispatchEvent(new CustomEvent('chat-visibility-change', { detail: showChat }));
+    } catch (e) {}
+  }, [showChat]);
 
     // State for tracking expanded sections in mobile view
     const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({});
@@ -515,6 +542,31 @@ export const Content = ({
 
   // Function to handle form submission
   const handleSubmitProblem = () => {
+    // Build situation message for chat
+    try {
+      const orderId = currentOrder?.ID ? `#${currentOrder.ID}` : '(fără ID)';
+      const zona = problemZone || 'Grafica';
+      let produsNume = '';
+      if (currentOrder && Array.isArray(currentOrder.produse_finale)) {
+        const found = currentOrder.produse_finale.find((p: any) => String(p?.id_produs) === String(problemProduct));
+        produsNume = found?.nume || (problemProduct ? `Produs ${problemProduct}` : 'Produs nespecificat');
+      }
+      const descriere = problemDescription?.trim() || '(fără descriere)';
+      const msg = `Problema comandă ${orderId}\nZona: ${zona}\nProdus: ${produsNume}\nDescriere: ${descriere}`;
+      const mine = { from: 'eu' as const, text: msg, time: nowTime() };
+      setChatMessages((prev) => [...prev, mine]);
+      setShowChat(true);
+      // Fake acknowledgement from Grafica
+      setTimeout(() => {
+        setChatMessages((prev) => [
+          ...prev,
+          { from: 'grafica' as const, text: 'Am preluat problema comenzii. Revin cu un update în curând. 🛠️', time: nowTime() },
+        ]);
+      }, 900);
+    } catch (e) {
+      // no-op if chat state unavailable
+    }
+
     // Reset form and close modal
     setProblemZone("");
     setProblemProduct("");
@@ -632,8 +684,8 @@ export const Content = ({
 
   return (
     <>
-      <main className="ml-32 p-4 mt-20 flex-1 backgroundculiniute">
-        <div className="grid grid-cols-1 sm:grid-cols-9 gap-2 mb-6 relative">
+      <main className={`${showChat ? 'pr-[15vw]' : ''} ml-32 mt-20 flex-1 backgroundculiniute`}>
+        <div className="grid grid-cols-1 sm:grid-cols-9 gap-2 mb-6 relative p-3 border border-b-1 border-border bg-white dark:bg-[#020817]  ">
           {/* Mobile toggle button for expanding/collapsing statuses */}
           <div className="sm:hidden w-full mb-2 flex justify-center -mt-8">
             <Button 
@@ -681,11 +733,28 @@ export const Content = ({
                 onClick={() => selecteazaZona(stat.title)}
               >
                 <div className="flex items-center gap-2">
-                  {stat.icon && (
+                  {(() => {
+                    const t = (stat.title || '').toLowerCase();
+                    if (t === 'dpd') {
+                      return (
+                        <div className="w-12 h-7 bg-white rounded flex items-center justify-center">
+                          <img src="/curieri/dpd.jpg" alt="dpd  Courier" className="w-10 h-6 object-contain" />
+                        </div>
+                      );
+                    }
+                    if (t === 'fan' || t === 'fan courier' || t === 'fancurier') {
+                      return (
+                        <div className="w-12 h-7 bg-white rounded flex items-center justify-center">
+                          <img src="/curieri/fan.jpg" alt="FAN Courier" className="w-10 h-6 object-contain" />
+                        </div>
+                      );
+                    }
+                    return stat.icon ? (
                       <div className={`w-6 h-6 ${stat.color} rounded flex items-center justify-center`}>
                         <stat.icon className="w-4 h-4 text-white" />
                       </div>
-                  )}
+                    ) : null;
+                  })()}
                   <span className="text-xs">{stat.title}</span>
                   <span className="ml-auto font-bold">{stat.value}</span>
                 </div>
@@ -828,7 +897,7 @@ export const Content = ({
           );
         })()}
 
-        <div className="mb-6 ">
+        <div className="mb-6 mx-3">
           {/* Mobile view: flex layout */}
           <div className="flex flex-col sm:hidden gap-3">
             <div className="flex items-center gap-2 w-full">
@@ -965,7 +1034,7 @@ export const Content = ({
 
         </div>
 
-        <hr className="border-t border-border/40 my-4" />
+
 
         {isLoading && <div className="p-4">Se încarcă statisticile...</div>}
 
@@ -976,7 +1045,7 @@ export const Content = ({
           </div>
         )}
 
-        <div className="space-y-4 ">
+        <div className="space-y-4 mx-3">
           {comenzi.length === 0 && !isLoadingComenzi && (
             <Card className="p-8 text-center">
               <ShoppingCart className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
@@ -1028,19 +1097,19 @@ export const Content = ({
                     <div className="flex flex-col items-end space-y-1 bg-white p-1 rounded-3xl">
                       {comanda.ramburs === "FanCurier 0" ? (
                         <div className="courier-card">
-                          <img src="https://crm.actium.ro/logo/fan.jpg" alt="DPD" className="w-10 h-6 object-contain" />
+                          <img src="/curieri/fan.jpg" alt="fan" className="w-10 h-6 object-contain" />
                         </div>
                       ) : comanda.ramburs === "FanCurier" ? (
                         <div className="courier-card">
-                          <img src="https://crm.actium.ro/logo/fan.jpg" alt="FAN Courier" className="w-10 h-6 object-contain" />
+                          <img src="/curieri/fan.jpg" alt="FAN Courier" className="w-10 h-6 object-contain" />
                         </div>
                       ) : comanda.ramburs === "DPD 0" ? (
                         <div className="courier-card">
-                          <img src="https://crm.actium.ro/logo/dpd.jpg" alt="FAN Courier" className="w-10 h-6 object-contain" />
+                          <img src="/curieri/dpd.jpg" alt="dpd Courier" className="w-10 h-6 object-contain" />
                         </div>
                       ) : comanda.ramburs === "DPD" ? (
                         <div className="courier-card">
-                          <img src="https://crm.actium.ro/logo/dpd.jpg" alt="DPD" className="w-10 h-6 object-contain" />
+                          <img src="/curieri/dpd.jpg" alt="DPD" className="w-10 h-6 object-contain" />
                         </div>
                       ) : (
                        <>
@@ -1232,7 +1301,7 @@ export const Content = ({
                       {comanda.produse_finale.length === 1 && (
                         Array.from({ length: 5 }).map((_, i) => (
                           <div key={`ph-${i}`} className="flex items-center space-x-2">
-                            <div className="w-12 h-12 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                            <div className="w-12 h-12 rounded bg-gray-100 dark:bg-gray-900 animate-pulse" />
                           </div>
                         ))
                       )}
@@ -1383,6 +1452,86 @@ export const Content = ({
         </div>
       </main>
 
+      {/* Docked Chat cu Grafica */}
+      {showChat && (
+        <div className="fixed inset-y-0 right-0 z-[80] w-[15vw]">
+          <Card className="w-full h-full shadow-lg border border-border bg-card flex flex-col overflow-hidden relative">
+            {/* Header */}
+            <div className="px-3 py-2 border-b border-border bg-secondary text-secondary-foreground flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" />
+                <span className="text-sm font-semibold">Chat Grafica</span>
+              </div>
+              <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => setShowChat(false)} aria-label="Închide chat">
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            {/* Messages */}
+            <div className="flex-1 p-3 space-y-2 overflow-y-auto bg-background/60">
+              {chatMessages.map((m, i) => (
+                <div key={i} className={`flex ${m.from === 'eu' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`${m.from === 'eu' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'} px-3 py-2 rounded-2xl max-w-[220px] text-xs shadow-sm`}>
+                    <div className="whitespace-pre-wrap break-words">{m.text}</div>
+                    <div className="text-[10px] opacity-70 mt-1 text-right">{m.time}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Input */}
+            <form
+              className="p-2 border-t border-border bg-card flex items-center gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const text = chatInput.trim();
+                if (!text) return;
+                const mine = { from: 'eu' as const, text, time: nowTime() };
+                setChatMessages((prev) => [...prev, mine]);
+                setChatInput('');
+                // Fake reply from Grafica
+                setTimeout(() => {
+                  setChatMessages((prev) => [
+                    ...prev,
+                    { from: 'grafica', text: 'Am notat. Revin în 2-3 minute cu fișierul actualizat. ✅', time: nowTime() },
+                  ]);
+                }, 1200);
+              }}
+            >
+              <input
+                type="text"
+                className="flex-1 text-sm bg-background text-foreground border border-input rounded px-2 py-2 outline-none"
+                placeholder="Scrie un mesaj..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+              />
+              <Button type="submit" size="sm" className="h-9 px-3">
+                <Send className="w-4 h-4" />
+              </Button>
+            </form>
+          </Card>
+          {/* Subtle side toggle on left border */}
+          <button
+            className="absolute left-0 top-3/4 -translate-y-1/2 -translate-x-1/2 z-[81] w-9 h-9 rounded-full bg-secondary text-secondary-foreground shadow border border-border hover:opacity-90"
+            onClick={() => setShowChat(false)}
+            aria-label="Ascunde chat"
+            title="Ascunde chat"
+            type="button"
+          >
+            <MessageSquare className="w-4 h-4 m-auto" />
+          </button>
+        </div>
+      )}
+      {/* Floating toggle button (hidden when chat is open) */}
+      {!showChat && (
+        <Button
+          className="fixed bottom-4 right-4 z-50 rounded-full h-12 w-12 p-0 shadow-lg bg-primary text-primary-foreground hover:opacity-90"
+          onClick={() => setShowChat(true)}
+          aria-label="Deschide chat Grafica"
+          title="Chat Grafica"
+        >
+          <MessageSquare className="w-6 h-6" />
+        </Button>
+      )}
+
       {/* Problem reporting modal */}
       <Dialog open={showProblemModal} onOpenChange={setShowProblemModal}>
         <DialogContent className="sm:max-w-md">
@@ -1401,7 +1550,6 @@ export const Content = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="grafica">Grafica</SelectItem>
-                  <SelectItem value="customer">Customer</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1561,7 +1709,7 @@ export const Content = ({
             <div className="flex items-center justify-between">
               <div className="text-lg font-semibold">Studiu produse</div>
               <Button variant="ghost" size="sm" onClick={() => setShowStudiuModal(false)} aria-label="Închide">
-                <X className="h-4 w-4" />
+
               </Button>
             </div>
           </div>
