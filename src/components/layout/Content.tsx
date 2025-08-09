@@ -875,13 +875,20 @@ export const Content = ({
             </Card>
           )}
 
-          {displayedComenzi.length > 0 && (
-            <div className={`grid gap-6 grid-cols-1 ${desktopCols === 2 ? 'md:grid-cols-2' : desktopCols === 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
-              {displayedComenzi.map((comanda) => (
-                <Card 
-                  key={comanda.ID} 
-                  className={`p-4 bg-card relative ${comanda.logprogravare ? 'blue-shadow-pulse' : ''}`}
+            {displayedComenzi.length > 0 && (
+                <div
+                    className={`${desktopCols === 2
+                        ? 'md:columns-2'
+                        : desktopCols === 4
+                            ? 'md:columns-4'
+                            : 'md:columns-3'
+                    } columns-1 gap-x-6`}
                 >
+                    {displayedComenzi.map((comanda) => (
+                        <Card
+                            key={comanda.ID}
+                            className={`p-4 bg-card relative mb-6 break-inside-avoid block ${comanda.logprogravare ? 'blue-shadow-pulse' : ''}`}
+                        >
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <h3 className="text-lg font-semibold text-foreground">
