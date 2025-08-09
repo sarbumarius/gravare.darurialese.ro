@@ -9,28 +9,32 @@ import { Button } from "@/components/ui/button";
 import { DashboardProps, StatItem, PontajData, Comanda, WorkHistoryItem } from "@/types/dashboard";
 
 const API_BASE = 'https://crm.actium.ro';
-const EXTERNAL_API_URL = `${API_BASE}/api/statusuriproductie`;
+const EXTERNAL_API_URL = `${API_BASE}/api/statusurigravare`;
 const PONTAJ_API_URL   = `${API_BASE}/api/azi-nou-angajat`;
-const COMENZI_API_URL  = `${API_BASE}/api/comenzi-daruri-alese`;
+const COMENZI_API_URL  = `${API_BASE}/api/comenzi-daruri-alese-gravare`;
 const TIMER_START_API_URL = `${API_BASE}/api/action-timer-start-new`;
 const TIMER_STOP_API_URL = `${API_BASE}/api/action-timer-stop-new`;
 const WORK_HISTORY_API_URL = `${API_BASE}/api/zile-muncite-luna-curenta-nou`;
 
 const initialStatsData: StatItem[] = [
-    { title: "Productie", value: 0, icon: Package, color: "bg-green-500", group: 'left' },
+    { title: "Gravare", value: 0, icon: Package, color: "bg-purple-500", group: 'right' },
+
+
     { title: "FAN", value: 0, icon: Package, color: "bg-blue-500", group: 'left' },
     { title: "DPD", value: 0, icon: Package, color: "bg-red-500", group: 'left' },
+
+    { title: "Productie", value: 0, icon: Package, color: "bg-green-500", group: 'left' },
+    { title: "Legatorie", value: 0, icon: Package, color: "bg-indigo-500", group: 'right' },
+
     { title: "Aprobare client", value: 0, icon: Timer, color: "bg-orange-500", group: 'right' },
     { title: "Procesare", value: 0, icon: null, color: "bg-blue-500", group: 'right' },
     { title: "In asteptare", value: 0, icon: null, color: "bg-yellow-500", group: 'right' },
-    { title: "Plata in asteptare", value: 0, icon: null, color: "bg-red-500", group: 'right' },
-    { title: "Gravare", value: 0, icon: Package, color: "bg-purple-500", group: 'right' },
-    { title: "Legatorie", value: 0, icon: Package, color: "bg-indigo-500", group: 'right' }
+    { title: "Plata in asteptare", value: 0, icon: null, color: "bg-red-500", group: 'right' }
 ];
 
 export const Dashboard = ({ user, onLogout }: DashboardProps) => {
     const [zonaActiva, setZonaActiva] = useState(() =>
-        localStorage.getItem('zonaActiva') || 'debitare'
+        localStorage.getItem('zonaActiva') || 'gravare'
     );
     const [statsData, setStatsData] = useState<StatItem[]>(initialStatsData);
     const [isLoading, setIsLoading] = useState(false);

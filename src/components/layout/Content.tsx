@@ -96,6 +96,9 @@ export const Content = ({
   // State for mobile status expansion
   const [areStatusesExpanded, setAreStatusesExpanded] = useState(false);
 
+  // Filter: All | Cu gravare | Cu printare (default All)
+  const [filterTipGrafica, setFilterTipGrafica] = useState<'all' | 'gravare' | 'printare'>('all');
+
     // State for tracking expanded sections in mobile view
     const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({});
 
@@ -146,6 +149,13 @@ export const Content = ({
       });
     }
 
+    // Filter by tip grafica (gravare/printare/all)
+    if (filterTipGrafica === 'gravare') {
+      filtered = filtered.filter(comanda => !!comanda.gravare);
+    } else if (filterTipGrafica === 'printare') {
+      filtered = filtered.filter(comanda => !!comanda.printare);
+    }
+
     // Filter out commands that are being moved
     if (movingCommandId !== null) {
       filtered = filtered.filter(comanda => comanda.ID !== movingCommandId);
@@ -156,13 +166,13 @@ export const Content = ({
 
     // Sort orders with logprodebitare first
     filtered = filtered.sort((a, b) => {
-      if (a.logprodebitare && !b.logprodebitare) return -1;
-      if (!a.logprodebitare && b.logprodebitare) return 1;
+      if (a.logprogravare && !b.logprogravare) return -1;
+      if (!a.logprogravare && b.logprogravare) return 1;
       return 0;
     });
 
     return filtered;
-  }, [comenzi, selectedProductId, selectedShippingData, searchTerm, formatDate, movingCommandId]);
+  }, [comenzi, selectedProductId, selectedShippingData, searchTerm, formatDate, movingCommandId, filterTipGrafica]);
 
 
   // Extract unique shipping dates
@@ -227,7 +237,7 @@ export const Content = ({
       setNewStockValues({});
       setInventorySearchTerm("");
 
-      const response = await fetch('https://actium.ro/api/financiar/lista-raport-stocuri/sistem:debitare');
+      const response = await fetch('https://actium.ro/api/financiar/lista-raport-stocuri/sistem:gravare');
 
       if (!response.ok) {
         throw new Error('Failed to fetch inventory data');
@@ -486,7 +496,7 @@ export const Content = ({
       setComenzi(prevComenzi => 
         prevComenzi.map(comanda => 
           comanda.ID === comandaId 
-            ? { ...comanda, logprodebitare: true } 
+            ? { ...comanda, logprogravare: true }
             : comanda
         )
       );
@@ -582,8 +592,8 @@ export const Content = ({
           {/*</div>*/}
         </div>
 
-        {/* Panou global anexe produs - se afișează sub statusurile mari */}
-        {expandedProdPanel && (() => {
+        {/* Panou global anexe produs - ascuns conform cerinței */}
+        {false && expandedProdPanel && (() => {
           const selOrder = comenzi.find((c) => c.ID === expandedProdPanel.orderId);
           const prod = selOrder?.produse_finale?.[expandedProdPanel.productIndex];
           if (!selOrder || !prod) return null;
@@ -716,7 +726,7 @@ export const Content = ({
           <div className="hidden sm:grid md:grid-cols-3 gap-3">
 
               {/* Middle grid: Inventory and Studiu buttons */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-stretch">
                   <Card
                       className="p-2 cursor-pointer whitespace-nowrap transition-colors h-full flex items-center"
                       onClick={() => {
@@ -744,6 +754,45 @@ export const Content = ({
                           </div>
                           <span className="text-xs">Studiu</span>
                       </div>
+                  </Card>
+                  {/* Filtru: All / Cu gravare / Cu printare */}
+                  <Card className="px-3 py-2 flex items-center">
+                    <div className="flex items-center gap-3 text-xs">
+                      <span className="text-muted-foreground">Filtru:</span>
+                      <label className="inline-flex items-center gap-1 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="tipGrafica"
+                          value="all"
+                          checked={filterTipGrafica === 'all'}
+                          onChange={() => setFilterTipGrafica('all')}
+                          className="accent-blue-600"
+                        />
+                        <span>All</span>
+                      </label>
+                      <label className="inline-flex items-center gap-1 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="tipGrafica"
+                          value="gravare"
+                          checked={filterTipGrafica === 'gravare'}
+                          onChange={() => setFilterTipGrafica('gravare')}
+                          className="accent-blue-600"
+                        />
+                        <span>Cu gravare</span>
+                      </label>
+                      <label className="inline-flex items-center gap-1 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="tipGrafica"
+                          value="printare"
+                          checked={filterTipGrafica === 'printare'}
+                          onChange={() => setFilterTipGrafica('printare')}
+                          className="accent-blue-600"
+                        />
+                        <span>Cu printare</span>
+                      </label>
+                    </div>
                   </Card>
               </div>
 
@@ -831,7 +880,7 @@ export const Content = ({
               {displayedComenzi.map((comanda) => (
                 <Card 
                   key={comanda.ID} 
-                  className={`p-4 bg-card relative ${comanda.logprodebitare ? 'blue-shadow-pulse' : ''}`}
+                  className={`p-4 bg-card relative ${comanda.logprogravare ? 'blue-shadow-pulse' : ''}`}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div>
@@ -871,8 +920,8 @@ export const Content = ({
                     </div>
                   </div>
 
-                  {/* Alert: Anexe diferite */}
-                  {(() => {
+                  {/* Alert: Anexe diferite - ascuns conform cerinței */}
+                  {false && (() => {
                     const ad: any = (comanda as any)?.anexe_diferite_comanda;
                     const flag = (ad && (ad.anexe_diferite_comanda === '1' || ad.anexe_diferite_comanda === 1 || ad.anexe_diferite_comanda === true))
                       || ad === '1' || ad === 1 || ad === true;
@@ -881,6 +930,40 @@ export const Content = ({
                       <div className="w-full mb-3">
                         <div className="w-full rounded-md border px-3 py-2 text-xs font-medium bg-yellow-50 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-700">
                           Atentie: Anexe diferite!
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Alerte: Anexe diferite / Cantitate diferita */}
+                  {(() => {
+                    // Anexe diferite flag (existing logic)
+                    const ad: any = (comanda as any)?.anexe_diferite_comanda;
+                    const hasAnexeDiferite = (ad && (ad.anexe_diferite_comanda === '1' || ad.anexe_diferite_comanda === 1 || ad.anexe_diferite_comanda === true))
+                      || ad === '1' || ad === 1 || ad === true;
+
+                    // Cantitate diferita: any product has quantity > 1
+                    const hasCantitateDiferita = Array.isArray(comanda.produse_finale)
+                      && comanda.produse_finale.some((p: any) => {
+                        const q = typeof p?.quantity === 'string' ? parseFloat(p.quantity) : p?.quantity;
+                        return Number(q) > 1;
+                      });
+
+                    if (!hasAnexeDiferite && !hasCantitateDiferita) return null;
+
+                    return (
+                      <div className="w-full mb-3">
+                        <div className="flex flex-wrap gap-2">
+                          {hasAnexeDiferite && (
+                            <div className="rounded-md border px-3 py-2 text-xs font-medium bg-yellow-50 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-700">
+                              Atentie: Anexe diferite!
+                            </div>
+                          )}
+                          {hasCantitateDiferita && (
+                            <div className="rounded-md border px-3 py-2 text-xs font-medium bg-yellow-50 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-700">
+                              Atentie: Cantitate diferita!
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
@@ -908,7 +991,7 @@ export const Content = ({
                         <span className="text-muted-foreground">Bucăți</span>
                         <span className="font-semibold">{comanda.total_buc}</span>
                       </div>
-                      <div className="flex flex-col border-l border-border pl-2 bg-muted/50 rounded-r">
+                      <div className="flex flex-col border-l border-border pl-2  rounded-r">
                         <span className="text-muted-foreground">Preț</span>
                         <span className="font-bold">{comanda.order_total_formatted}</span>
                       </div>
@@ -966,14 +1049,14 @@ export const Content = ({
                         {/*>*/}
                         {/*  <Eye className="w-4 h-4 text-muted-foreground" />*/}
                         {/*</a>*/}
-                        <a 
-                          href={`https://crm.actium.ro/api/generare-bon-debitare/${comanda.ID}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-7 h-7 bg-muted hover:bg-muted/80 rounded-full flex items-center justify-center cursor-pointer"
-                        >
-                          <Printer className="w-4 h-4 text-muted-foreground" />
-                        </a>
+                        {/*<a */}
+                        {/*  href={`https://crm.actium.ro/api/generare-bon-debitare/${comanda.ID}`}*/}
+                        {/*  target="_blank"*/}
+                        {/*  rel="noopener noreferrer"*/}
+                        {/*  className="w-7 h-7 bg-muted hover:bg-muted/80 rounded-full flex items-center justify-center cursor-pointer"*/}
+                        {/*>*/}
+                        {/*  <Printer className="w-4 h-4 text-muted-foreground" />*/}
+                        {/*</a>*/}
                         {comanda.previzualizare_galerie && comanda.previzualizare_galerie.length > 0 && (
                           <div 
                             className="w-7 h-7 bg-muted hover:bg-muted/80 rounded-full flex items-center justify-center cursor-pointer"
@@ -1001,128 +1084,130 @@ export const Content = ({
                     {/* Panoul inline din card a fost mutat sus, sub statusurile mari */}
                     {null}
 
-                    {/* Product images section */}
-                    <div>
+                    {/* Product images section - grid cu maxim 6 rânduri */}
+                    <div className="grid grid-cols-6  gap-2">
                       {comanda.produse_finale.map((produs, idx) => (
-                        <div key={idx} className="flex items-center space-x-2 bg-muted/10 rounded mb-2">
+                        <div key={idx} className="flex items-center space-x-2 bg-muted/10 rounded">
                           <div className="relative">
                             <img
                               src={produs.poza ? `https://darurialese.com/wp-content/uploads/${produs.poza}` : "/api/placeholder/48/48"}
                               alt="Product"
-                              className="w-12 h-12 object-cover rounded cursor-pointer"
-                              onClick={() => {
-                                // Toggle inline annex panel for this product
-                                setExpandedProdPanel((prev) => {
-                                  if (prev && prev.orderId === comanda.ID && prev.productIndex === idx) return null;
-                                  return { orderId: comanda.ID, productIndex: idx };
-                                });
-                              }}
-                              title="Deschide anexele produsului"
+                              className="w-12 h-12 object-cover rounded"
                             />
                             <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
                               {produs.quantity}
                             </div>
                           </div>
-                          <div className="flex-1">
-                            <div className="grid grid-cols-10 gap-0.5 text-[10px] font-medium text-center">
-                              {[
-                                { label: 'WNG', key: 'wenge' },
-                                { label: 'ALB', key: 'alb' },
-                                { label: 'NAT', key: 'natur' },
-                                { label: 'PLEXI', key: 'plexi' },
-                                { label: 'PRINT', key: 'print' },
-                                { label: 'GOLD', key: 'gold' },
-                                { label: 'G.ALB', key: 'gravarealb' },
-                                { label: 'G.WNG', key: 'gravarewenge' },
-                                { label: 'P.GOLD', key: 'plexi_gold' },
-                                { label: 'ARG.', key: 'argintiu' }
-                              ].map((anexa, i) => (
-                                <div key={i} className="flex flex-col items-center space-y-0.5">
-                                  <span className={`text-muted-foreground ${!(produs.anexe_alpha && produs.anexe_alpha[anexa.key]) && !(produs.anexe && produs.anexe[anexa.key]) ? 'md:block hidden' : ''}`}>{anexa.label}</span>
-                                  {produs.anexe_alpha && produs.anexe_alpha[anexa.key] ? (
-                                    <a
-                                      href={`https://crm.actium.ro/api/download/${encodeToBase64(`https://crm.actium.ro/uploads/templateproduse/anexe/${produs.anexe_alpha[anexa.key]}`)}`}
-                                      download
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="w-5 h-5 bg-muted border border-border hover:bg-muted/60 rounded flex items-center justify-center cursor-pointer transition-colors text-black dark:text-white text-xs font-bold"
-                                      title="Descarcă"
-                                    >
-                                      ⤓
-                                    </a>
-                                  ) : produs.anexe[anexa.key] ? (
-                                    <a
-                                      href={`https://crm.actium.ro/api/download/${encodeToBase64(`https://crm.actium.ro/uploads/templateproduse/anexe/${produs.anexe[anexa.key]}`)}`}
-                                      download
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="w-5 h-5 bg-muted border border-border hover:bg-muted/60 rounded flex items-center justify-center cursor-pointer transition-colors text-black dark:text-white text-xs font-bold"
-                                      title="Descarcă"
-                                    >
-                                      ⤓
-                                    </a>
-                                  ) : (
-                                    <span className="text-gray-500 md:block hidden">✗</span>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
                         </div>
                       ))}
+                      {comanda.produse_finale.length === 1 && (
+                        Array.from({ length: 5 }).map((_, i) => (
+                          <div key={`ph-${i}`} className="flex items-center space-x-2">
+                            <div className="w-12 h-12 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                          </div>
+                        ))
+                      )}
                     </div>
 
-                    {/* Graphic files section (only shown when comanda.logprodebitare is true) */}
-                    {comanda.logprodebitare && comanda.download_fisiere_grafica && comanda.download_fisiere_grafica.length > 0 && (
-                      <div className="bg-muted/10 p-2 rounded">
-                        <div className="text-xs font-medium mb-1">Fișiere grafică:</div>
-                        <div className="flex flex-wrap gap-2">
-                          {Array.isArray(comanda.download_fisiere_grafica) &&
-                              comanda.download_fisiere_grafica.map((file, idx) => {
-                                if (typeof file !== 'string' || !file.includes('/')) return null;
+                    {/* Graphic files section (grouped by Gravare and Printare; shown when logprogravare and files exist) */}
+                    {comanda.logprogravare && Array.isArray(comanda.download_fisiere_grafica) && (
+                      (() => {
+                        // Group files by type based on extension
+                        const gravareExt = ['svg', 'ai', 'dxf'];
+                        const printExt = ['eps', 'pdf']; // include pdf as print candidate if present
 
-                                const fileName = file.split('/').pop();
-                                const extension = fileName?.split('.').pop()?.toLowerCase() || 'fișier';
+                        const gravareFiles = comanda.download_fisiere_grafica.filter((file: any) => {
+                          if (typeof file !== 'string') return false;
+                          const fileName = file.includes('/') ? file.split('/').pop() : file;
+                          const ext = (fileName?.split('.').pop() || '').toLowerCase();
+                          return gravareExt.includes(ext);
+                        });
 
-                                // Determine if it's laser or print based on extension
-                                const fileType = ['svg', 'ai', 'dxf'].includes(extension) 
-                                  ? 'laser' 
-                                  : (extension === 'eps' ? 'print' : '');
+                        const printFiles = comanda.download_fisiere_grafica.filter((file: any) => {
+                          if (typeof file !== 'string') return false;
+                          const fileName = file.includes('/') ? file.split('/').pop() : file;
+                          const ext = (fileName?.split('.').pop() || '').toLowerCase();
+                          return printExt.includes(ext);
+                        });
 
-                                // Choose background color based on file type
-                                const bgColor = fileType === 'laser' 
-                                  ? 'bg-gray-700'
-                                  : (fileType === 'print' ? 'bg-gray-400' : 'bg-gray-400');
 
-                                return (
-                                    <a
-                                        key={idx}
-                                        href={`https://crm.actium.ro/api/download/${encodeToBase64(`https://darurialese.ro/wp-content/uploads/${file}`)}`}
-                                        download
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={`flex items-center gap-1 ${bgColor}  px-2 py-1 rounded text-xs transition-colors`}
-                                        title={`Descarcă fișier ${fileName}`}
-                                    >
-            <span className="w-4 h-4 bg-gray-500 rounded flex items-center justify-center text-white text-xs font-bold">
-              ⤓
-            </span>
-                                      <span className="truncate max-w-[150px] text-white">
-                                        {extension} {fileType && <span className="text-xs ml-1 font-medium text-white">({fileType})</span>}
-                                      </span>
-                                    </a>
-                                );
-                              })}
-                        </div>
-                      </div>
+                        const renderFileChip = (file: string, colorClass: string) => {
+                          const fileName = file.includes('/') ? file.split('/').pop() || '' : file;
+                          const baseName = fileName.replace(/\.[^.]+$/, ''); // remove extension
+                          const downloadHref = `https://crm.actium.ro/api/download/${encodeToBase64(`https://darurialese.ro/wp-content/uploads/${file}`)}`;
+                          return (
+                            <a
+                              key={file}
+                              href={downloadHref}
+                              download
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`flex items-center justify-center gap-1 ${colorClass} px-2 py-2 rounded text-xs transition-colors w-full`}
+                              title={`Descarcă fișier ${fileName}`}
+                            >
+                              <span className="w-4 h-4 bg-gray-500 rounded flex items-center justify-center text-white text-xs font-bold">⤓</span>
+
+                            </a>
+                          );
+                        };
+
+                        return (
+                          <div className="bg-muted/10 p-2 rounded grid grid-cols-2 gap-2 border border-1 border-gray-300">
+
+                            {(() => {
+                              const gc = gravareFiles.length === 1 ? 'grid-cols-1' : gravareFiles.length === 2 ? 'grid-cols-2' : gravareFiles.length === 4 ? 'grid-cols-4' : 'grid-cols-3';
+                              return (
+                                <div className="mb-2">
+                                  <div className="text-xs font-semibold mb-1">Gravare ({gravareFiles.length})</div>
+                                  <div className={`grid gap-2 ${gc}`}>
+                                    {gravareFiles.length > 0 ? (
+                                      gravareFiles.map((f: string) => (
+                                        <div key={f} className="min-w-0">{renderFileChip(f, 'bg-gray-700')}</div>
+                                      ))
+                                    ) : (
+                                      Array.from({ length: 4 }).map((_, i) => (
+                                        <div key={`grav-sk-${i}`} className="min-w-0">
+                                          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-full" />
+                                        </div>
+                                      ))
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })()}
+
+                            {(() => {
+                              const pc = printFiles.length === 1 ? 'grid-cols-1' : printFiles.length === 2 ? 'grid-cols-2' : printFiles.length === 4 ? 'grid-cols-4' : 'grid-cols-3';
+                              return (
+                                <div>
+                                  <div className="text-xs font-semibold mb-1">Printare ({printFiles.length})</div>
+                                  <div className={`grid gap-2 ${pc}`}>
+                                    {printFiles.length > 0 ? (
+                                      printFiles.map((f: string) => (
+                                        <div key={f} className="min-w-0">{renderFileChip(f, 'bg-gray-400')}</div>
+                                      ))
+                                    ) : (
+                                      Array.from({ length: 4 }).map((_, i) => (
+                                        <div key={`print-sk-${i}`} className="min-w-0">
+                                          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-full" />
+                                        </div>
+                                      ))
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        );
+                      })()
                     )}
 
                     {/* Action buttons section */}
                     <div>
-                      {comanda.logprodebitare ? (
+                      {comanda.logprogravare ? (
                         <div className="text-xs text-muted-foreground">
                           {/* Only show the button for production, dpd, fan, and client approval - hide for gravare and legatorie */}
-                          {(zonaActiva !== 'gravare' && zonaActiva !== 'legatorie') && (
+                          {(zonaActiva !== 'productie' && zonaActiva !== 'legatorie') && (
                             <Button 
                               className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 text-base"
                               onClick={() => handleMutaClick(comanda.ID)}
@@ -1142,7 +1227,7 @@ export const Content = ({
                       ) : (
                         <div>
                           {/* Only show the button for production, dpd, fan, and client approval */}
-                          {(zonaActiva === 'productie' || zonaActiva === 'dpd' || zonaActiva === 'fan' || zonaActiva === 'aprobareclient') && (
+                          {(zonaActiva === 'gravare' || zonaActiva === 'dpd' || zonaActiva === 'fan' ) && (
                             <Button 
                               className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 text-base"
                               onClick={() => handleIncepeDebitareClick(comanda.ID)}
