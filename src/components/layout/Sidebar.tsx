@@ -23,16 +23,16 @@ interface GroupedProduct {
 }
 
 export const Sidebar = ({ comenzi, selectedProductId, setSelectedProductId }: SidebarProps) => {
-  
+
   // Group products by id and count occurrences
   const groupedProducts: GroupedProduct[] = React.useMemo(() => {
     const productMap = new Map<string, GroupedProduct>();
-    
+
     comenzi.forEach(comanda => {
       comanda.produse_finale.forEach(produs => {
         const id = produs.id_produs;
         const quantity = parseInt(produs.quantity) || 1;
-        
+
         if (productMap.has(id)) {
           const existingProduct = productMap.get(id)!;
           existingProduct.count += quantity;
@@ -46,21 +46,21 @@ export const Sidebar = ({ comenzi, selectedProductId, setSelectedProductId }: Si
         }
       });
     });
-    
+
     return Array.from(productMap.values()).sort((a, b) => b.count - a.count);
   }, [comenzi]);
-  
+
   // Filter orders that contain the selected product
   const filteredOrders = React.useMemo(() => {
     if (!selectedProductId) return [];
-    
+
     return comenzi.filter(comanda => 
       comanda.produse_finale.some(produs => produs.id_produs === selectedProductId)
     );
   }, [comenzi, selectedProductId]);
 
   return (
-    <aside className="w-32 bg-muted/10 p-4 border-r border-border h-screen overflow-y-auto fixed left-0 top-20 bottom-0">
+    <aside className="w-32 bg-muted/10 p-4 border-r border-border h-screen overflow-y-auto fixed left-0 top-20 bottom-0 no-scrollbar">
       <h2 className="text-lg font-semibold mt-0 text-center">{groupedProducts.length} buc</h2>
       {selectedProductId && (
         <div className="flex justify-center mb-3">
@@ -76,7 +76,7 @@ export const Sidebar = ({ comenzi, selectedProductId, setSelectedProductId }: Si
           </Button>
         </div>
       )}
-      
+
       {groupedProducts.length === 0 ? (
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map((item) => (
@@ -113,7 +113,7 @@ export const Sidebar = ({ comenzi, selectedProductId, setSelectedProductId }: Si
               </Card>
             ))}
           </div>
-          
+
           {selectedProductId && filteredOrders.length > 0 && (
             <div className="mt-6">
               <h3 className="text-md font-semibold mb-3">Comenzi cu acest produs ({filteredOrders.length})</h3>

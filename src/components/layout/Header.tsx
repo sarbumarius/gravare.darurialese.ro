@@ -445,17 +445,17 @@ export const Header = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="bg-black border-b border-border p-4 shadow-sm fixed top-0 left-0 right-0 z-50">
+    <header className="header-bg border-b border-border p-4 shadow-sm fixed top-0 left-0 right-0 z-50">
       <div className="flex items-center justify-between w-full gap-4">
         <div className="flex items-center gap-4">
           <img
               src="logo.svg"
               alt="Daruri Alese Logo"
-              className="h-8 ml-1"
+              className="h-12 ml-4"
           />
 
           {/* Desktop view */}
-          <div className="hidden md:flex ml-14 items-center gap-3 border border-gray-700 rounded-md px-3 py-1.5">
+          <div className="hidden md:flex ml-6 items-center gap-3 border border-gray-700 rounded-md px-3 py-1.5">
             <div 
               className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => setShowWorkHistoryModal(true)}
@@ -492,28 +492,28 @@ export const Header = ({
             <Button
               variant="outline"
               size="sm"
-              className="h-7 ml-1"
+              className="h-7 ml-1 text-black dark:text-white"
               onClick={() => setShowROIModal(true)}
             >
-              <FileText className="w-4 h-4 mr-1" />
+              <FileText className="w-4 h-4 mr-1 text-black dark:text-white" />
               ROI
             </Button>
             <Button
               variant="outline"
               size="sm"
-              className="h-7 ml-1"
+              className="h-7 ml-1 text-black dark:text-white"
               onClick={() => setShowConcediiModal(true)}
             >
-              <CalendarDays className="w-4 h-4 mr-1" />
+              <CalendarDays className="w-4 h-4 mr-1 text-black dark:text-white" />
               Concedii
             </Button>
             <Button
               variant="outline"
               size="sm"
-              className="h-7 ml-1"
+              className="h-7 ml-1 text-black dark:text-white"
               onClick={() => setShowTasksModal(true)}
             >
-              <Clipboard className="w-4 h-4 mr-1" />
+              <Clipboard className="w-4 h-4 mr-1 text-black dark:text-white" />
               Taskuri
             </Button>
 
@@ -578,7 +578,7 @@ export const Header = ({
             </Button>
           </div>
         </div>
-        <div className="flex items-center space-x-2 ml-2">
+        <div className="flex items-center space-x-2 ml-2 text-black dark:text-white">
           {/* Cache status & refresh (replaces Activ/Oprit) */}
           <div className="hidden md:flex items-center mr-1">
             {isLoadingStatus ? (
@@ -900,13 +900,13 @@ export const Header = ({
       <Dialog open={showROIModal} onOpenChange={setShowROIModal}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Regulament de Ordine Interioară - Operator Debitare PFL & Plexiglas</DialogTitle>
-            <DialogDescription>Regulile și procedurile specifice pentru operatorii de debitare PFL și plexiglas</DialogDescription>
+            <DialogTitle>Regulament de Ordine Interioară – Departamentul de Gravare (CO2 & Metal)</DialogTitle>
+            <DialogDescription>Regulile și procedurile specifice pentru activitatea de gravare cu laser CO2 și laser pentru metale (fiber/galvo)</DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold mb-2">1. Program de lucru</h3>
+                <h3 className="text-lg font-semibold mb-2">1. Program de lucru & Pontaj</h3>
                 <p className="text-sm text-muted-foreground">
                   Programul standard este de Luni – Vineri, între orele 08:00 – 17:00.
                 </p>
@@ -914,112 +914,160 @@ export const Header = ({
                   <li>Pauza de masă este stabilită între 12:30 – 13:00 și se respectă întocmai.</li>
                   <li>Prezența este înregistrată prin aplicația de pontaj electronic, disponibilă pe dispozitive mobile sau desktop.</li>
                   <li>Pontajul este obligatoriu la începutul și sfârșitul programului.</li>
-                  <li>Echipamentele de debitare pot fi pornite doar dacă pontajul este activ (integrare aplicație utilaje).</li>
+                  <li>Echipamentele de gravare pot fi pornite doar dacă pontajul este activ (integrare aplicație utilaje).</li>
                   <li>Lipsa pontajului echivalează cu absență nemotivată.</li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-2">2. Sarcini și responsabilități</h3>
+                <h3 className="text-lg font-semibold mb-2">2. Sarcini & responsabilități</h3>
                 <ul className="list-disc pl-5 mt-2 text-sm text-muted-foreground">
-                  <li>Operarea utilajelor laser pentru debitarea corectă a materialelor PFL și plexiglas.</li>
-                  <li>Pregătirea fișierelor conform comenzilor din aplicația Debitare - Daruri Alese (Cloud).</li>
-                  <li>Respectarea ordinii de execuție și a termenelor de finalizare.</li>
-                  <li>Încărcarea materialelor și verificarea setărilor tehnice înainte de pornirea laserului.</li>
-                  <li>Marcarea comenzilor finalizate în aplicație.</li>
+                  <li>Operarea gravatoarelor CO2 și laser pentru metale (fiber/galvo) conform comenzilor.</li>
+                  <li>Pregătirea fișierelor conform specificațiilor din Aplicația Cloud – Gravare Daruri Alese.</li>
+                  <li>Respectarea ordinii de execuție și a termenelor asumate.</li>
+                  <li>Verificarea materialelor, focusului, parametrilor (putere, viteză, frecvență/puls, treceri, air assist) înainte de rulare.</li>
+                  <li>Marcarea comenzilor ca finalizate în aplicație și atașarea fotografiilor/rapoartelor, dacă se solicită.</li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-2">3. Întreținere și mentenanță</h3>
+                <h3 className="text-lg font-semibold mb-2">3. Mentenanță & întreținere</h3>
                 <p className="text-sm text-muted-foreground">
-                  Curățarea zilnică a spațiului de lucru la începutul și sfârșitul turei.
+                  Curățenie zilnică la începutul și sfârșitul turei (masă de lucru, zonă încărcare/descărcare, spațiu comun).
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Întreținerea echipamentului:
+                  Întreținere periodică a echipamentelor:
                 </p>
                 <ul className="list-disc pl-5 mt-1 text-sm text-muted-foreground">
-                  <li>curățarea oglinzilor, lentilelor, tăvii de resturi,</li>
-                  <li>verificarea funcționării ventilatorului/extractorului de fum.</li>
+                  <li>CO2: curățare oglinzi/lentilă, verificare aliniere, air assist, chiller/temperatură; curățare tăvi/grătare de resturi; verificare ventilator/extractor.</li>
+                  <li>Fiber/galvo (metale): verificare focalizare, colimație/scan head, integritatea fereastrei de protecție, funcționare exhaust.</li>
+                  <li>Evidență în Registrul de Mentenanță (data, operația, persoana).</li>
                 </ul>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Orice defecțiune, comportament anormal sau eroare tehnică trebuie raportată imediat către responsabilul tehnic.
+                  Raportare imediată a oricărei defecțiuni/comportament anormal către responsabilul tehnic; oprire utilaj dacă există risc.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-2">4. Fluxul digital de lucru</h3>
+                <h3 className="text-lg font-semibold mb-2">4. Flux digital de lucru</h3>
                 <p className="text-sm text-muted-foreground">
                   Comenzile se gestionează prin:
                 </p>
                 <ul className="list-disc pl-5 mt-1 text-sm text-muted-foreground">
-                  <li>Aplicația Cloud Debitare Daruri Alese (vizualizare și status)</li>
-                  <li>Google Drive-ul de producție (fișiere de tăiat, documente de referință)</li>
+                  <li>Aplicația Cloud – Gravare Daruri Alese (vizualizare, status, atașamente).</li>
+                  <li>Google Drive de producție (fișiere sursă, șabloane, documente tehnice).</li>
                 </ul>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Este interzisă modificarea, redenumirea sau ștergerea fișierelor fără aprobare.
+                  Interzis: modificarea/redenumirea/ștergerea fișierelor fără aprobare.
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Se interzice folosirea contului de muncă în scop personal.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-2">5. Concedii și învoiri</h3>
-                <ul className="list-disc pl-5 mt-1 text-sm text-muted-foreground">
-                  <li>Operatorul beneficiază de concediul de odihnă legal conform contractului individual de muncă.</li>
-                  <li>Solicitările de concediu se fac cu minimum 5 zile lucrătoare înainte, prin aplicația internă sau formular transmis superiorului direct.</li>
-                  <li>Învoirile pentru urgențe pot fi acordate doar cu aprobarea coordonatorului și se limitează la maxim 3 zile/an.</li>
-                  <li>În caz de concediu medical, adeverința se aduce în prima zi de revenire la locul de muncă.</li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-2">6. Etică și comportament profesional</h3>
-                <p className="text-sm text-muted-foreground">
-                  Se cere respect și colaborare față de colegi și conducere.
+                  Naming standard fișiere: [ID Comandă]_[Client]_[Material]_[Versiune].
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Nu se acceptă:
+                  Preflight obligatoriu înainte de gravare:
                 </p>
                 <ul className="list-disc pl-5 mt-1 text-sm text-muted-foreground">
-                  <li>limbaj vulgar, comportament violent,</li>
-                  <li>folosirea telefonului în timpul operării laserului (doar în cazuri de urgență).</li>
+                  <li>Formate acceptate (ex.: PDF/X, AI, SVG, DXF), fonturi convertite în curbe, rezoluții potrivite pentru raster.</li>
+                  <li>Validarea dimensiunilor și a poziționării în șablon.</li>
+                  <li>Test pe eșantion/referință unde este cazul (metale/acoperiri noi).</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-2">5. Materiale, consumabile & interdicții</h3>
+                <p className="text-sm text-muted-foreground">
+                  Materiale uzuale:
+                </p>
+                <ul className="list-disc pl-5 mt-1 text-sm text-muted-foreground">
+                  <li>lemn, PFL, MDF, plexiglas/acrilic, piele, sticlă (CO2)</li>
+                  <li>inox, oțel, aluminiu eloxat, alamă, cupru (fiber/galvo)</li>
+                  <li>materiale acoperite (lac/pulberi), etichete tehnice</li>
                 </ul>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Este strict interzis consumul de alcool sau substanțe interzise în timpul programului.
+                  Consumabile: bandă termică, compuși de marcare (unde e cazul), alcool izopropilic, lavete fără scame, măști de protecție a suprafeței, mănuși.
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Materiale strict interzise la CO2 (toxice/riscuri): PVC/vinil clorurat, policarbonat gros, ABS, fibră de carbon cu rășini, materiale necunoscute fără fișă tehnică. Lista completă se afișează lângă utilaj.
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Materiale aduse de client: necesită aprobare și, la nevoie, test în prealabil; clientul confirmă asumarea riscurilor asupra aspectului final.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-2">7. Siguranța muncii</h3>
-                <ul className="list-disc pl-5 mt-1 text-sm text-muted-foreground">
-                  <li>Utilizarea ochelarilor de protecție și a echipamentului specific este obligatorie.</li>
-                  <li>Nu se lasă utilajul pornit nesupravegheat.</li>
-                  <li>În caz de urgență: se urmează protocolul de evacuare.</li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-2">8. Evaluare și feedback</h3>
+                <h3 className="text-lg font-semibold mb-2">6. Sănătate & Securitate în muncă (SSM)</h3>
                 <p className="text-sm text-muted-foreground">
-                  Activitatea se evaluează periodic în funcție de:
+                  Echipament individual de protecție (EIP) obligatoriu:
                 </p>
                 <ul className="list-disc pl-5 mt-1 text-sm text-muted-foreground">
-                  <li>calitatea debitărilor,</li>
-                  <li>respectarea termenelor,</li>
-                  <li>curățenia și starea echipamentelor,</li>
-                  <li>implicarea și comunicarea.</li>
+                  <li>ochelari certificați pentru lungimea de undă a utilajului folosit (CO2 ~10.6 μm; fiber ~1064 nm)</li>
+                  <li>mănuși, mască/respirator unde impune fișa materialului</li>
                 </ul>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Orice nerespectare gravă a acestui regulament poate duce la avertisment, reținere din salariu sau desfacerea contractului, conform Codului Muncii.
+                  Nu se lasă utilajul nesupravegheat în timpul gravării.
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Ține air assist activ (unde e aplicabil), îndepărtează materiale inflamabile din zona de lucru.
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Păstrează la îndemână stingător (ABC/CO2) și cunoaște oprirea de urgență.
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Interzis consumul de alcool/substanțe interzise; interzis telefonul în timpul operării (exceptând urgențe).
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Respectă protocolul de evacuare și instrucțiunile SSM/PSI afișate.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-2">9. Acceptare</h3>
+                <h3 className="text-lg font-semibold mb-2">7. Calitate, trasabilitate & livrare</h3>
+                <ul className="list-disc pl-5 mt-1 text-sm text-muted-foreground">
+                  <li>Respectarea bibliotecii de parametri internați; orice abatere se documentează.</li>
+                  <li>Control vizual post-proces (arderi, umbre, neuniformități, poziționare, adâncime/contrast la metale).</li>
+                  <li>Curățare piesă (metode compatibile: IPA, apă+săpun, șervețele speciale) conform materialului.</li>
+                  <li>Trasabilitate: fiecare job conține în aplicație parametrii folosiți, operatorul, timpul de rulare, nr. de bucăți, fotografie probă dacă e cerută.</li>
+                  <li>Neconformitățile se marchează în Registrul de NC și se comunică coordonatorului (acțiuni corective/preventive).</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-2">8. Concedii, învoiri & absențe</h3>
+                <ul className="list-disc pl-5 mt-1 text-sm text-muted-foreground">
+                  <li>Concediul de odihnă: conform contractului individual de muncă și legislației.</li>
+                  <li>Solicitări de concediu: cu minim 5 zile lucrătoare înainte (aplicație internă / formular către superiorul direct).</li>
+                  <li>Învoirile pentru urgențe: doar cu aprobarea coordonatorului, maxim 3 zile/an.</li>
+                  <li>Concediu medical: adeverință în prima zi de revenire.</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-2">9. Etică & comportament profesional</h3>
+                <ul className="list-disc pl-5 mt-1 text-sm text-muted-foreground">
+                  <li>Respect, colaborare și comunicare corectă cu colegii și conducerea.</li>
+                  <li>Interzis: limbaj vulgar, comportament agresiv, hărțuire, utilizarea conturilor de muncă în scop personal.</li>
+                  <li>Păstrarea confidențialității datelor clienților și a fișierelor de producție.</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-2">10. Evaluare & feedback</h3>
                 <p className="text-sm text-muted-foreground">
-                  La semnarea prezentului regulament, angajatul declară că a citit, înțeles și acceptă toate punctele menționate, angajându-se să le respecte.
+                  Evaluări periodice pe baza:
+                </p>
+                <ul className="list-disc pl-5 mt-1 text-sm text-muted-foreground">
+                  <li>calității gravărilor;</li>
+                  <li>respectării termenelor;</li>
+                  <li>curățeniei și stării echipamentelor;</li>
+                  <li>respectării SSM/PSI;</li>
+                  <li>implicării și comunicării.</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-2">11. Abateri & măsuri disciplinare</h3>
+                <p className="text-sm text-muted-foreground">
+                  Nerespectarea prezentului regulament, a instrucțiunilor SSM/PSI sau a dispozițiilor interne poate atrage: avertisment, reținere din salariu (unde permite legea/regulamentele interne) sau desfacerea contractului, conform Codului Muncii.
                 </p>
               </div>
             </div>

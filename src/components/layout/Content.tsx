@@ -274,7 +274,19 @@ export const Content = ({
       const json = await response.json();
       const items = Array.isArray(json?.data) ? json.data : [];
       // Filter out items that have already been debited (true, 1, or '1')
-      const filtered = items.filter((it: any) => !(it?.am_debitat === true || it?.am_debitat === 1 || it?.am_debitat === '1'));
+      const filtered = items.filter((it: any) => {
+        // Filter out items where am_gravat is true, 1, or '1'
+        if (it?.am_gravat === true || it?.am_gravat === 1 || it?.am_gravat === '1') {
+          return false;
+        }
+
+        // Also filter out items where all three fields are null
+        if (it?.am_gravat === null && it?.am_debitat === null && it?.am_printat === null) {
+          return false;
+        }
+
+        return true;
+      });
       setStudiuData(filtered);
     } catch (error) {
       console.error('Error fetching studiu data:', error);
@@ -316,6 +328,114 @@ export const Content = ({
     } catch (e) {
       console.error('Eroare la marcarea ca debitat:', e);
       alert('A apărut o eroare la marcarea ca debitat. Încercați din nou.');
+    } finally {
+      setStudiuMarkLoading(prev => ({ ...prev, [id]: false }));
+    }
+  };
+
+  // Mark a studiu item as printat
+  const handleMarkStudiuPrintat = async (id: number) => {
+    try {
+      setStudiuMarkLoading(prev => ({ ...prev, [id]: true }));
+
+      // Try POST first
+      let response = await fetch(`https://crm.actium.ro/api/studiu/printat/${id}`, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json'
+        }
+      });
+
+      // If POST is not allowed, fallback to GET
+      if (!response.ok && response.status === 405) {
+        response = await fetch(`https://crm.actium.ro/api/studiu/printat/${id}`, {
+          method: 'GET',
+          headers: { 'accept': 'application/json' }
+        });
+      }
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || 'Eroare la marcarea ca printat');
+      }
+
+      // On success, remove item from list (since am_printat === true should be filtered out)
+      setStudiuData(prev => prev.filter((it: any) => it?.id !== id));
+    } catch (e) {
+      console.error('Eroare la marcarea ca printat:', e);
+      alert('A apărut o eroare la marcarea ca printat. Încercați din nou.');
+    } finally {
+      setStudiuMarkLoading(prev => ({ ...prev, [id]: false }));
+    }
+  };
+
+  // Mark a studiu item as gravat
+  const handleMarkStudiuGravat = async (id: number) => {
+    try {
+      setStudiuMarkLoading(prev => ({ ...prev, [id]: true }));
+
+      // Try POST first
+      let response = await fetch(`https://crm.actium.ro/api/studiu/gravat/${id}`, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json'
+        }
+      });
+
+      // If POST is not allowed, fallback to GET
+      if (!response.ok && response.status === 405) {
+        response = await fetch(`https://crm.actium.ro/api/studiu/gravat/${id}`, {
+          method: 'GET',
+          headers: { 'accept': 'application/json' }
+        });
+      }
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || 'Eroare la marcarea ca gravat');
+      }
+
+      // On success, remove item from list (since am_gravat === true should be filtered out)
+      setStudiuData(prev => prev.filter((it: any) => it?.id !== id));
+    } catch (e) {
+      console.error('Eroare la marcarea ca gravat:', e);
+      alert('A apărut o eroare la marcarea ca gravat. Încercați din nou.');
+    } finally {
+      setStudiuMarkLoading(prev => ({ ...prev, [id]: false }));
+    }
+  };
+
+  // Mark a studiu item as produs fizic
+  const handleMarkStudiuProdusFizic = async (id: number) => {
+    try {
+      setStudiuMarkLoading(prev => ({ ...prev, [id]: true }));
+
+      // Try POST first
+      let response = await fetch(`https://crm.actium.ro/api/studiu/produsfizic/${id}`, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json'
+        }
+      });
+
+      // If POST is not allowed, fallback to GET
+      if (!response.ok && response.status === 405) {
+        response = await fetch(`https://crm.actium.ro/api/studiu/produsfizic/${id}`, {
+          method: 'GET',
+          headers: { 'accept': 'application/json' }
+        });
+      }
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || 'Eroare la marcarea ca produs fizic');
+      }
+
+      // On success, remove item from list
+      setStudiuData(prev => prev.filter((it: any) => it?.id !== id));
+    } catch (e) {
+      console.error('Eroare la marcarea ca produs fizic:', e);
+      alert('A apărut o eroare la marcarea ca produs fizic. Încercați din nou.');
     } finally {
       setStudiuMarkLoading(prev => ({ ...prev, [id]: false }));
     }
@@ -408,7 +528,7 @@ export const Content = ({
       // Set the moving command ID to show loading state
       setMovingCommandId(comandaId);
 
-      const response = await fetch(`https://crm.actium.ro/api/muta-debitare/${comandaId}/${userId}`, {
+      const response = await fetch(`https://crm.actium.ro/api/muta-gravare/${comandaId}/${userId}`, {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
@@ -474,7 +594,7 @@ export const Content = ({
       // Set the starting command ID to show loading state
       setStartingCommandId(comandaId);
 
-      const response = await fetch(`https://crm.actium.ro/api/incepe-debitare/${comandaId}/${userId}`, {
+      const response = await fetch(`https://crm.actium.ro/api/incepe-gravare/${comandaId}/${userId}`, {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
@@ -620,7 +740,7 @@ export const Content = ({
             return { file: a || n, useAlpha: !!a };
           };
           return (
-            <div className="border border-border w-full p-3 rounded-md bg-card/50 mb-4" style={{ width: '100%', overflow: 'auto' }}>
+            <div className="border border-border w-full p-3 rounded-md bg-card/50 mb-4 " style={{ width: '100%', overflow: 'auto' }}>
               <div className="relative overflow-x-auto">
                 <Table className="w-full text-xs min-w-[900px]">
                   <TableHeader>
@@ -708,7 +828,7 @@ export const Content = ({
           );
         })()}
 
-        <div className="mb-6">
+        <div className="mb-6 ">
           {/* Mobile view: flex layout */}
           <div className="flex flex-col sm:hidden gap-3">
             <div className="flex items-center gap-2 w-full">
@@ -723,7 +843,7 @@ export const Content = ({
           </div>
 
           {/* Desktop view: 3-grid layout */}
-          <div className="hidden sm:grid md:grid-cols-3 gap-3">
+          <div className="hidden sm:grid md:grid-cols-3 gap-3 ">
 
               {/* Middle grid: Inventory and Studiu buttons */}
               <div className="flex gap-2 items-stretch">
@@ -845,6 +965,8 @@ export const Content = ({
 
         </div>
 
+        <hr className="border-t border-border/40 my-4" />
+
         {isLoading && <div className="p-4">Se încarcă statisticile...</div>}
 
         {isLoadingComenzi && (
@@ -854,7 +976,7 @@ export const Content = ({
           </div>
         )}
 
-        <div className="space-y-4">
+        <div className="space-y-4 ">
           {comenzi.length === 0 && !isLoadingComenzi && (
             <Card className="p-8 text-center">
               <ShoppingCart className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
@@ -960,9 +1082,9 @@ export const Content = ({
 
                     return (
                       <div className="w-full mb-3">
-                        <div className="flex flex-wrap gap-2">
+                        <div className=" gap-2">
                           {hasAnexeDiferite && (
-                            <div className="rounded-md border px-3 py-2 text-xs font-medium bg-yellow-50 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-700">
+                            <div className="mb-2 rounded-md border px-3 py-2 text-xs font-medium bg-yellow-50 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-700">
                               Atentie: Anexe diferite!
                             </div>
                           )}
@@ -1152,14 +1274,14 @@ export const Content = ({
                               className={`flex items-center justify-center gap-1 ${colorClass} px-2 py-2 rounded text-xs transition-colors w-full`}
                               title={`Descarcă fișier ${fileName}`}
                             >
-                              <span className="w-4 h-4 bg-gray-500 rounded flex items-center justify-center text-white text-xs font-bold">⤓</span>
+                              <span className="w-4 h-4  rounded flex items-center justify-center text-white text-xs font-bold">🡇</span>
 
                             </a>
                           );
                         };
 
                         return (
-                          <div className="bg-muted/10 p-2 rounded grid grid-cols-2 gap-2 border border-1 border-gray-300">
+                          <div className="bg-muted/10 p-2 rounded grid grid-cols-2 gap-2 border border-1 border-gray-300 dark:border-gray-800">
 
                             {(() => {
                               const gc = gravareFiles.length === 1 ? 'grid-cols-1' : gravareFiles.length === 2 ? 'grid-cols-2' : gravareFiles.length === 4 ? 'grid-cols-4' : 'grid-cols-3';
@@ -1174,7 +1296,7 @@ export const Content = ({
                                     ) : (
                                       Array.from({ length: 4 }).map((_, i) => (
                                         <div key={`grav-sk-${i}`} className="min-w-0">
-                                          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-full" />
+                                          <div className="h-8  rounded  w-full" />
                                         </div>
                                       ))
                                     )}
@@ -1191,7 +1313,7 @@ export const Content = ({
                                   <div className={`grid gap-2 ${pc}`}>
                                     {printFiles.length > 0 ? (
                                       printFiles.map((f: string) => (
-                                        <div key={f} className="min-w-0">{renderFileChip(f, 'bg-gray-400')}</div>
+                                        <div key={f} className="min-w-0">{renderFileChip(f, 'bg-green-600')}</div>
                                       ))
                                     ) : (
                                       Array.from({ length: 4 }).map((_, i) => (
@@ -1226,7 +1348,7 @@ export const Content = ({
                                   Se procesează...
                                 </div>
                               ) : (
-                                "Muta ▶"
+                                "Muta ➦"
                               )}
                             </Button>
                           )}
@@ -1246,7 +1368,7 @@ export const Content = ({
                                   Se procesează...
                                 </div>
                               ) : (
-                                "Incepe procesul ▶"
+                                "Incepe procesul ➦"
                               )}
                             </Button>
                           )}
@@ -1308,10 +1430,10 @@ export const Content = ({
               <Label htmlFor="department">Departament</Label>
               <Select disabled>
                 <SelectTrigger id="department">
-                  <SelectValue placeholder="Debitare" />
+                  <SelectValue placeholder="Gravare" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="debitare">Debitare</SelectItem>
+                  <SelectItem value="gravare">Gravare</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1433,17 +1555,23 @@ export const Content = ({
 
       {/* Studiu modal */}
       <Dialog open={showStudiuModal} onOpenChange={setShowStudiuModal}>
-        <DialogContent className="sm:max-w-5xl fixed left-1/2 transform rounded-t-xl rounded-b-none max-h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Studiu produse</DialogTitle>
-          </DialogHeader>
-          <div className="py-4 flex-grow overflow-hidden">
+        <DialogContent className="fixed right-0 top-0 left-auto h-screen max-h-screen translate-x-0 translate-y-0 rounded-none w-full sm:w-[520px] md:w-[320px] overflow-hidden p-0">
+          {/* Header */}
+          <div className="border-b border-border px-4 py-3 bg-card">
+            <div className="flex items-center justify-between">
+              <div className="text-lg font-semibold">Studiu produse</div>
+              <Button variant="ghost" size="sm" onClick={() => setShowStudiuModal(false)} aria-label="Închide">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div className="h-[calc(100vh-52px)] overflow-y-auto px-4 py-4">
             {isLoadingStudiu ? (
               <div className="flex justify-center items-center h-40">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
               </div>
             ) : (
-              <div className="overflow-auto max-h-[calc(90vh-140px)] space-y-4 pr-1">
+              <div className="space-y-4">
                 {studiuData.length === 0 ? (
                   <div className="text-sm text-muted-foreground px-2">Nu există elemente de afișat.</div>
                 ) : (
@@ -1463,9 +1591,18 @@ export const Content = ({
                     ];
                     const imageUrl = item?.poza_prezentare ? `https://crm.actium.ro/uploads/researchdevelopment/${item.poza_prezentare}` : '';
                     return (
-                      <Card key={idx} className="p-3">
-                        <div className="flex gap-3 items-start">
-                          <div className="w-24 h-24 bg-muted/30 rounded overflow-hidden flex items-center justify-center">
+                      <Card key={idx} className="p-4">
+                        <div className="flex flex-col gap-2">
+                          <span>{item?.titlu_custom || 'Fără titlu'}</span>
+
+                          {(() => {
+                            if (item?.tip_produs) {
+                              const s = String(item.tip_produs).replace(/-/g, ' ');
+                              return <div className="text-xs text-muted-foreground truncate mb-2 ">{s.charAt(0).toUpperCase() + s.slice(1)}</div>;
+                            }
+                            return <div className="text-xs text-muted-foreground truncate ">-</div>;
+                          })()}
+                          <div className="w-full h-52 bg-muted/30 rounded overflow-hidden flex items-center justify-center">
                             {imageUrl ? (
                               <img src={imageUrl} alt={item?.titlu_custom || 'poza prezentare'} className="w-full h-full object-contain" />
                             ) : (
@@ -1473,101 +1610,161 @@ export const Content = ({
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
+                        <div className="">
                               <div className="truncate">
-                                <div className="text-sm font-semibold truncate flex items-center gap-2">
-                                  <span>{item?.titlu_custom || 'Fără titlu'}</span>
+                                <div className="text-sm font-semibold truncate gap-2">
+
                                   <div className="flex items-center gap-1">
-                                    {/* Debitat: show button when null, icon otherwise */}
-                                    {item?.am_debitat == null ? (
+                                    {item?.am_debitat == 1 && (
+                                        <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-muted/40" title="Debitat">
+                                        {(item?.am_debitat === true || item?.am_debitat === 1 || item?.am_debitat === '1') ? (
+                                            <Check className="w-3 h-3" />
+                                        ) : (
+                                            <X className="w-3 h-3" />
+                                        )}
+                                          <span>Debitat</span>
+                                      </span>
+                                    )}
+
+                                    {/* Printat: show button when null AND print files exist, icon otherwise */}
+                                    {item?.am_printat == null && item?.grafica_produs_print && Array.isArray(item.grafica_produs_print) && item.grafica_produs_print.length > 0 ? (
                                       <Button
                                         size="xs"
-                                        className="h-6 px-2 bg-green-600 hover:bg-green-700 text-white"
-                                        onClick={() => handleMarkStudiuDebitat(item.id)}
+                                        className="h-6 px-2 bg-green-600 hover:bg-green-700 text-white w-full"
+                                        onClick={() => handleMarkStudiuPrintat(item.id)}
                                         disabled={!!studiuMarkLoading[item.id]}
-                                        title="Marchează ca debitat"
+                                        title="Marchează ca printat"
                                       >
-                                        {studiuMarkLoading[item.id] ? '...' : 'Am debitat'}
+                                        {studiuMarkLoading[item.id] ? '...' : 'Am printat'}
                                       </Button>
-                                    ) : (
-                                      <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-muted/40" title="Debitat">
-                                        {(item?.am_debitat === true || item?.am_debitat === 1 || item?.am_debitat === '1') ? (
+                                    ) : item?.am_printat != null ? (
+                                      <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-muted/40" title="Printat">
+                                        {(item?.am_printat === true || item?.am_printat === 1 || item?.am_printat === '1') ? (
                                           <Check className="w-3 h-3" />
                                         ) : (
                                           <X className="w-3 h-3" />
                                         )}
-                                        <span>Debitat</span>
+                                        <span>Printat</span>
                                       </span>
-                                    )}
+                                    ) : null}
 
-                                    {/* Printat icon */}
-                                    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-muted/40" title="Printat">
-                                      {item?.am_printat === true ? (
-                                        <Check className="w-3 h-3" />
-                                      ) : (
-                                        <X className="w-3 h-3" />
-                                      )}
-                                      <span>Printat</span>
-                                    </span>
+                                    {/* Gravat: show button when null AND gravare file exists, icon otherwise */}
+                                    {item?.am_gravat == null && item?.grafica_produs_gravare ? (
+                                      <Button
+                                        size="xs"
+                                        className="h-6 px-2 bg-green-600 hover:bg-green-700 text-white"
+                                        onClick={() => handleMarkStudiuGravat(item.id)}
+                                        disabled={!!studiuMarkLoading[item.id]}
+                                        title="Marchează ca gravat"
+                                      >
+                                        {studiuMarkLoading[item.id] ? '...' : 'Am gravat'}
+                                      </Button>
+                                    ) : item?.am_gravat != null ? (
+                                      <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-muted/40" title="Gravat">
+                                        {(item?.am_gravat === true || item?.am_gravat === 1 || item?.am_gravat === '1') ? (
+                                          <Check className="w-3 h-3" />
+                                        ) : (
+                                          <X className="w-3 h-3" />
+                                        )}
+                                        <span>Gravat</span>
+                                      </span>
+                                    ) : null}
 
-                                    {/* Gravat icon */}
-                                    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-muted/40" title="Gravat">
-                                      {item?.am_gravat === true ? (
-                                        <Check className="w-3 h-3" />
-                                      ) : (
-                                        <X className="w-3 h-3" />
-                                      )}
-                                      <span>Gravat</span>
-                                    </span>
+
                                   </div>
+
+                                  {/* Produs Fizic: show button only when all three conditions are met */}
+                                  {((item?.am_gravat === true || item?.am_gravat === 1 || item?.am_gravat === '1') ||
+                                          (item?.am_gravat === null && !item?.grafica_produs_gravare)) &&
+                                      (item?.am_printat === true || item?.am_printat === 1 || item?.am_printat === '1') &&
+                                      (item?.am_debitat === true || item?.am_debitat === 1 || item?.am_debitat === '1') && (
+                                          <Button
+                                              size="xs"
+                                              className="h-6 px-2  bg-blue-600 hover:bg-blue-700 text-white w-full mt-2"
+                                              onClick={() => handleMarkStudiuProdusFizic(item.id)}
+                                              disabled={!!studiuMarkLoading[item.id]}
+                                              title="Marchează ca produs fizic realizat"
+                                          >
+                                            {studiuMarkLoading[item.id] ? '...' : 'Am realizat produsul fizic'}
+                                          </Button>
+                                      )}
                                 </div>
-                                {(() => {
-                                  if (item?.tip_produs) {
-                                    const s = String(item.tip_produs).replace(/-/g, ' ');
-                                    return <div className="text-xs text-muted-foreground truncate mt-0.5">{s.charAt(0).toUpperCase() + s.slice(1)}</div>;
-                                  }
-                                  return <div className="text-xs text-muted-foreground truncate mt-0.5">-</div>;
-                                })()}
+
                               </div>
                             </div>
                             <div className="mt-3 overflow-x-auto">
-                              <Table className="text-xs min-w-[700px]">
-                                <TableHeader>
-                                  <TableRow>
-                                    {anexes.map((ax, i) => (
-                                      <TableHead key={i} className="py-1 text-center">{ax.label}</TableHead>
-                                    ))}
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  <TableRow>
-                                    {anexes.map((ax, i) => {
-                                      const file = item?.[ax.key];
-                                      const hasFile = !!file;
-                                      const fileUrl = hasFile ? `https://crm.actium.ro/uploads/anexe/${file}` : '';
-                                      return (
-                                        <TableCell key={i} className="py-1 text-center">
-                                          {hasFile ? (
-                                            <a
-                                              href={fileUrl}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              download
-                                              className="w-7 h-7 bg-muted hover:bg-muted/60 rounded flex items-center justify-center mx-auto"
-                                              title={String(file)}
-                                              aria-label={`Download ${String(file)}`}
-                                            >
-                                              <Download className="w-4 h-4" />
-                                            </a>
-                                          ) : (
-                                            <span className="text-gray-500">—</span>
-                                          )}
-                                        </TableCell>
-                                      );
-                                    })}
-                                  </TableRow>
-                                </TableBody>
-                              </Table>
+                              <div className="mt-4">
+                                <div className="text-sm font-medium mb-2">Fișiere disponibile:</div>
+                                <div className=" gap-2">
+                                {/* Display download links for print files */}
+                                {item?.grafica_produs_print && Array.isArray(item.grafica_produs_print) && item.grafica_produs_print.length > 0 && 
+                                  item.grafica_produs_print.map((file, i) => (
+                                    <a
+                                      key={i}
+                                      href={`https://crm.actium.ro/uploads/researchdevelopment/${file}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      download
+                                      className="flex items-center gap-2 px-3 py-2 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors"
+                                      title={`Download print: ${file}`}
+                                    >
+                                      <Download className="w-4 h-4" />
+                                      <span>Download print</span>
+                                    </a>
+                                  ))
+                                }
+
+                                {/* Display download link for gravare file */}
+                                {item?.grafica_produs_gravare && (
+                                  <a
+                                    href={`https://crm.actium.ro/uploads/researchdevelopment/${item.grafica_produs_gravare}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    download
+                                    className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-800 rounded hover:bg-green-200 transition-colors"
+                                    title={`Download gravare: ${item.grafica_produs_gravare}`}
+                                  >
+                                    <Download className="w-4 h-4" />
+                                    <span>Download gravare</span>
+                                  </a>
+                                )}
+
+                                {/* Display download link for template AI file */}
+                                {/*{item?.template_ai && (*/}
+                                {/*  <a*/}
+                                {/*    href={`https://crm.actium.ro/uploads/researchdevelopment/${item.template_ai}`}*/}
+                                {/*    target="_blank"*/}
+                                {/*    rel="noopener noreferrer"*/}
+                                {/*    download*/}
+                                {/*    className="flex items-center gap-2 px-3 py-2 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition-colors"*/}
+                                {/*    title={`Download template: ${item.template_ai}`}*/}
+                                {/*  >*/}
+                                {/*    <Download className="w-4 h-4" />*/}
+                                {/*    <span>Download template</span>*/}
+                                {/*  </a>*/}
+                                {/*)}*/}
+
+                                {/* Display download link for grafica produs editabil */}
+                                {/*{item?.grafica_produs_editabil && (*/}
+                                {/*  <a*/}
+                                {/*    href={`https://crm.actium.ro/uploads/researchdevelopment/${item.grafica_produs_editabil}`}*/}
+                                {/*    target="_blank"*/}
+                                {/*    rel="noopener noreferrer"*/}
+                                {/*    download*/}
+                                {/*    className="flex items-center gap-2 px-3 py-2 bg-amber-100 text-amber-800 rounded hover:bg-amber-200 transition-colors"*/}
+                                {/*    title={`Download grafică editabilă: ${item.grafica_produs_editabil}`}*/}
+                                {/*  >*/}
+                                {/*    <Download className="w-4 h-4" />*/}
+                                {/*    <span>Download grafică editabilă</span>*/}
+                                {/*  </a>*/}
+                                {/*)}*/}
+                                </div>
+
+                                {/* Show message if no files are available */}
+                                {!item?.grafica_produs_print && !item?.grafica_produs_gravare && !item?.template_ai && !item?.grafica_produs_editabil && (
+                                  <div className="text-sm text-muted-foreground">Nu există fișiere disponibile pentru descărcare.</div>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1578,14 +1775,6 @@ export const Content = ({
               </div>
             )}
           </div>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setShowStudiuModal(false)}
-            >
-              Închide
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
