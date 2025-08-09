@@ -61,7 +61,25 @@ export const Sidebar = ({ comenzi, selectedProductId, setSelectedProductId }: Si
 
   return (
     <aside className="w-32 bg-muted/10 p-4 border-r border-border h-screen overflow-y-auto fixed left-0 top-20 bottom-0 no-scrollbar">
-      <h2 className="text-lg font-semibold mt-0 text-center">{groupedProducts.length} buc</h2>
+      {(() => {
+        const totalCount = groupedProducts.reduce((sum, p) => sum + (Number(p.count) || 0), 0);
+        return (
+          <div className="flex justify-center mb-2">
+            <div
+              className="inline-flex rounded-md overflow-hidden border border-border"
+              title={`${groupedProducts.length} tipuri, ${totalCount} bucăți în total`}
+            >
+              <Button variant="ghost" size="sm" className="h-6 px-2 rounded-none text-xs">
+                {groupedProducts.length}
+              </Button>
+              <div className="h-6 w-px bg-border" />
+              <Button variant="ghost" size="sm" className="h-6 px-2 rounded-none text-xs">
+                {totalCount}
+              </Button>
+            </div>
+          </div>
+        );
+      })()}
       {selectedProductId && (
         <div className="flex justify-center mb-3">
           <Button
