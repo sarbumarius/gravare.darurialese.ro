@@ -60,12 +60,12 @@ export const Login = ({ onLogin }: LoginProps) => {
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-4">
             <img 
-              src="https://darurialese.com/wp-content/themes/woodmart-child/img/logo-menu-wt-01.svg" 
+              src="logo.svg"
               alt="Logo" 
               className="h-16"
             />
           </div>
-          <CardTitle className="text-2xl font-bold text-center">Dashboard Producție</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Dashboard Gravare</CardTitle>
           <CardDescription className="text-center">
             Introduceți datele de autentificare pentru a accesa dashboard-ul
           </CardDescription>
