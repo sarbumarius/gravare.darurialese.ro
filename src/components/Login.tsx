@@ -110,7 +110,7 @@ export const Login = ({ onLogin }: LoginProps) => {
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Dashboard Producție v1.0
+            © {new Date().getFullYear()} Dashboard Gravare v1.0
           </p>
         </CardFooter>
       </Card>

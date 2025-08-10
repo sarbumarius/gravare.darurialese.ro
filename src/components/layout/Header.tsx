@@ -1303,7 +1303,7 @@ export const Header = ({
                         {leave.document && (
                           <div className="mt-1">
                             <a 
-                              href={`https://actium.ro/documents/${leave.document}`} 
+                              href={`https://actium.ro/uploads/documente-concedii/${leave.document}`}
                               target="_blank" 
                               rel="noopener noreferrer"
                               className="text-xs text-blue-600 hover:underline flex items-center gap-1"
