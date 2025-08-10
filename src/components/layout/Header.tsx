@@ -921,10 +921,14 @@ export const Header = ({
               <div>
                 <h3 className="text-lg font-semibold mb-2">1. Program de lucru & Pontaj</h3>
                 <p className="text-sm text-muted-foreground">
-                  Programul standard este de Luni – Vineri, între orele 08:00 – 17:00.
+                    Programul standard este de Luni – Vineri, între orele 08:00 – 16:30 (8 ore de lucru + 30 min pauză de masă).
+
+
                 </p>
                 <ul className="list-disc pl-5 mt-2 text-sm text-muted-foreground">
-                  <li>Pauza de masă este stabilită între 12:30 – 13:00 și se respectă întocmai.</li>
+                  <li>Pauza de masă este stabilită între 12:30 – 13:00 și se respectă întocmai.
+                  </li>
+                  <li>Intervalul 08:00 – 17:00 include pauza de masă; astfel, durata efectivă a muncii este de 8 ore.</li>
                   <li>Prezența este înregistrată prin aplicația de pontaj electronic, disponibilă pe dispozitive mobile sau desktop.</li>
                   <li>Pontajul este obligatoriu la începutul și sfârșitul programului.</li>
                   <li>Echipamentele de gravare pot fi pornite doar dacă pontajul este activ (integrare aplicație utilaje).</li>
