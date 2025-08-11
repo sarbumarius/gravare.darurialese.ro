@@ -1554,7 +1554,7 @@ export const Content = ({
                                 return (
                                   <Button 
                                     className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 text-base"
-                                    onClick={() => handleIncepeDebitareClick(comanda.ID)}
+                                    onClick={() => handleIncepeGravareClick(comanda.ID)}
                                     disabled={startingCommandId === comanda.ID}
                                   >
                                     {startingCommandId === comanda.ID ? (
@@ -1574,7 +1574,7 @@ export const Content = ({
                                 return (
                                   <Button 
                                     className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 text-base"
-                                    onClick={() => handleIncepeDebitareClick(comanda.ID)}
+                                    onClick={() => handleIncepePrintareClick(comanda.ID)}
                                     disabled={startingCommandId === comanda.ID}
                                   >
                                     {startingCommandId === comanda.ID ? (
@@ -1593,7 +1593,7 @@ export const Content = ({
                               return (
                                 <Button 
                                   className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 text-base"
-                                  onClick={() => handleIncepeDebitareClick(comanda.ID)}
+                                  onClick={() => handleIncepeGravareClick(comanda.ID)}
                                   disabled={startingCommandId === comanda.ID}
                                 >
                                   {startingCommandId === comanda.ID ? (
