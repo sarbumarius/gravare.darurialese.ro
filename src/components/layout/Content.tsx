@@ -1124,6 +1124,11 @@ export const Content = ({
                     <div>
                       <h3 className="text-lg font-semibold text-foreground">
                         {comanda.shipping_details._shipping_first_name} {comanda.shipping_details._shipping_last_name}{" "}
+                        {(comanda.fara_factura_in_colet === "1" || comanda.fara_factura_in_colet === 1) && (
+                          <span title="Cadou oferit cadou" className="inline-flex items-center">
+                            <Gift className="w-4 h-4 text-red-500 mr-1" />
+                          </span>
+                        )}
                         <a 
                           href={`https://darurialese.com/wp-admin/post.php?post=${comanda.ID}&action=edit`}
                           target="_blank"
@@ -1463,6 +1468,29 @@ export const Content = ({
                           </div>
                         );
                       })()
+                    )}
+
+                    {/* Gift product section */}
+                    {comanda.produs_cadou_nou && (
+                      <div className="mb-3 p-2 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800">
+                        <div className="flex items-center gap-2">
+                          {comanda.produs_cadou_nou.produs_cadou_nou && (
+                            <img 
+                              src={`https://darurialese.com/wp-content/themes/woodmart-child/img/cadouri-comanda/${comanda.produs_cadou_nou.produs_cadou_nou}.png`}
+                              alt="Cadou"
+                              className="w-16 h-16 object-contain"
+                            />
+                          )}
+                          <div>
+                            <p className="text-sm font-medium">Cadou personalizat</p>
+                            {comanda.produs_cadou_nou.personalizare_cadou_comanda && (
+                              <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {comanda.produs_cadou_nou.personalizare_cadou_comanda}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     )}
 
                     {/* Action buttons section */}
