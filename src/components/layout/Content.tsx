@@ -641,7 +641,7 @@ export const Content = ({
   };
 
   // Function to handle "Incepe Debitare" button click
-  const handleIncepeDebitareClick = async (comandaId: number) => {
+  const handleIncepeGravareClick = async (comandaId: number) => {
     try {
       // Set the starting command ID to show loading state
       setStartingCommandId(comandaId);
@@ -671,6 +671,46 @@ export const Content = ({
             ? { ...comanda, logprogravare: true }
             : comanda
         )
+      );
+
+    } catch (error) {
+      console.error('Eroare la începerea debitării:', error);
+      alert('A apărut o eroare la începerea debitării. Vă rugăm să încercați din nou.');
+    } finally {
+      // Clear the starting command ID regardless of success or failure
+      setStartingCommandId(null);
+    }
+  };
+  const handleIncepePrintareClick = async (comandaId: number) => {
+    try {
+      // Set the starting command ID to show loading state
+      setStartingCommandId(comandaId);
+
+      const response = await fetch(`https://crm.actium.ro/api/incepe-gravare/${comandaId}/${userId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'accept': 'application/json',
+        }
+      });
+
+      // Parse the response
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Eroare la începerea debitării');
+      }
+
+      // Handle successful response
+      console.log('Debitare începută cu succes:', data);
+
+      // Update the command locally to show the "Muta" button instead of refreshing
+      setComenzi(prevComenzi =>
+          prevComenzi.map(comanda =>
+              comanda.ID === comandaId
+                  ? { ...comanda, logprogravare: true }
+                  : comanda
+          )
       );
 
     } catch (error) {
@@ -1388,7 +1428,7 @@ export const Content = ({
                                         <div key={f} className="min-w-0">{renderFileChip(f, 'bg-gray-700')}</div>
                                       ))
                                     ) : (
-                                      Array.from({ length: 4 }).map((_, i) => (
+                                      Array.from({ length: 3 }).map((_, i) => (
                                         <div key={`grav-sk-${i}`} className="min-w-0">
                                           <div className="h-8  rounded  w-full" />
                                         </div>
@@ -1410,7 +1450,7 @@ export const Content = ({
                                         <div key={f} className="min-w-0">{renderFileChip(f, 'bg-green-600')}</div>
                                       ))
                                     ) : (
-                                      Array.from({ length: 4 }).map((_, i) => (
+                                      Array.from({ length: 3 }).map((_, i) => (
                                         <div key={`print-sk-${i}`} className="min-w-0">
                                           <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-full" />
                                         </div>
@@ -1449,22 +1489,124 @@ export const Content = ({
                         </div>
                       ) : (
                         <div>
-                          {/* Only show the button for production, dpd, fan, and client approval */}
+                          {/* Only show the buttons for production, dpd, fan, and client approval */}
                           {(zonaActiva === 'gravare' || zonaActiva === 'dpd' || zonaActiva === 'fan' ) && (
-                            <Button 
-                              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 text-base"
-                              onClick={() => handleIncepeDebitareClick(comanda.ID)}
-                              disabled={startingCommandId === comanda.ID}
-                            >
-                              {startingCommandId === comanda.ID ? (
-                                <div className="flex items-center justify-center">
-                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                  Se procesează...
-                                </div>
-                              ) : (
-                                "Incepe procesul ➦"
-                              )}
-                            </Button>
+                            (() => {
+                              // Get the gravare and print files for this command
+                              const gravareExt = ['svg', 'ai', 'dxf'];
+                              const printExt = ['eps', 'pdf'];
+
+                              const gravareFiles = comanda.download_fisiere_grafica?.filter((file: any) => {
+                                if (typeof file !== 'string') return false;
+                                const fileName = file.includes('/') ? file.split('/').pop() : file;
+                                const ext = (fileName?.split('.').pop() || '').toLowerCase();
+                                return gravareExt.includes(ext);
+                              }) || [];
+
+                              const printFiles = comanda.download_fisiere_grafica?.filter((file: any) => {
+                                if (typeof file !== 'string') return false;
+                                const fileName = file.includes('/') ? file.split('/').pop() : file;
+                                const ext = (fileName?.split('.').pop() || '').toLowerCase();
+                                return printExt.includes(ext);
+                              }) || [];
+
+                              const hasGravare = gravareFiles.length > 0;
+                              const hasPrint = printFiles.length > 0;
+
+                              // If both gravare and print files exist, show two buttons
+                              if (hasGravare && hasPrint) {
+                                return (
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <Button 
+                                      className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 text-base"
+                                      onClick={() => handleIncepeGravareClick(comanda.ID)}
+                                      disabled={startingCommandId === comanda.ID}
+                                    >
+                                      {startingCommandId === comanda.ID ? (
+                                        <div className="flex items-center justify-center">
+                                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                          Se procesează...
+                                        </div>
+                                      ) : (
+                                        "Incepe gravare ➦"
+                                      )}
+                                    </Button>
+                                    <Button 
+                                      className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 text-base"
+                                      onClick={() => handleIncepePrintareClick(comanda.ID)}
+                                      disabled={startingCommandId === comanda.ID}
+                                    >
+                                      {startingCommandId === comanda.ID ? (
+                                        <div className="flex items-center justify-center">
+                                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                          Se procesează...
+                                        </div>
+                                      ) : (
+                                        "Incepe print ➦"
+                                      )}
+                                    </Button>
+                                  </div>
+                                );
+                              }
+
+                              // If only gravare files exist, show only the gravare button
+                              if (hasGravare) {
+                                return (
+                                  <Button 
+                                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 text-base"
+                                    onClick={() => handleIncepeDebitareClick(comanda.ID)}
+                                    disabled={startingCommandId === comanda.ID}
+                                  >
+                                    {startingCommandId === comanda.ID ? (
+                                      <div className="flex items-center justify-center">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                        Se procesează...
+                                      </div>
+                                    ) : (
+                                      "Incepe gravare ➦"
+                                    )}
+                                  </Button>
+                                );
+                              }
+
+                              // If only print files exist, show only the print button
+                              if (hasPrint) {
+                                return (
+                                  <Button 
+                                    className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 text-base"
+                                    onClick={() => handleIncepeDebitareClick(comanda.ID)}
+                                    disabled={startingCommandId === comanda.ID}
+                                  >
+                                    {startingCommandId === comanda.ID ? (
+                                      <div className="flex items-center justify-center">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                        Se procesează...
+                                      </div>
+                                    ) : (
+                                      "Incepe print ➦"
+                                    )}
+                                  </Button>
+                                );
+                              }
+
+                              // If no files exist, show a generic button (fallback to original behavior)
+                              return (
+                                <Button 
+                                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 text-base"
+                                  onClick={() => handleIncepeDebitareClick(comanda.ID)}
+                                  disabled={startingCommandId === comanda.ID}
+                                >
+                                  {startingCommandId === comanda.ID ? (
+                                    <div className="flex items-center justify-center">
+                                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                      Se procesează...
+                                    </div>
+                                  ) : (
+                                    "Incepe procesul ➦"
+                                  )}
+                                </Button>
+                              );
+                            })()
                           )}
                         </div>
                       )}
